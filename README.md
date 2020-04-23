@@ -51,3 +51,36 @@ Optional args:
   missed_variant_freq (float)  [0.6]   - call a possible missed variant if ref allele frequency < this value
   fp_freq             (float)  [0.4]   - call a false positive if ref allele frequency > this value
 ```
+
+## MergeVariants
+
+This software merges VCFs from multiple sources
+
+### Running
+
+```
+Usage: java -cp src MergeVariants [args]
+  Example: java -cp src MergeVariants filelist=vcflist.txt out_file=merged.vcf
+
+Required args:
+  file_list   (String) - a txt file containing absolute paths to VCF files, one on each line
+  out_file    (String) - file to write merged variants to
+ ```
+
+## Recommended Pipeline
+
+Inputs are `sample.fa`, `sample.vcf` from some variant caller, and `sample.bam`.
+
+```
+samtools mpileup --reference sample.fa sample.bam -o sample.mpileup
+javac src/*.java
+java -cp src CallVariants pileup_file=sample.mpileup out_file=allele_freq_calls.vcf
+# Print out vcf filenames with absolute paths to filelist.txt
+readlink -f sample.vcf > filelist.txt
+readlink -f allele_freq_calls.vcf >> filelist.txt
+java -cp src MergeVariants file_list=filelist.txt out_file=merged.vcf
+# Print possible false positives
+cat merged.vcf | grep 'SUPP_VEC=10'
+# Print possible false negatives
+cat merged.vcf | grep 'SUPP_VEC=01'
+```
