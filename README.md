@@ -1,14 +1,40 @@
 # VariantValidator
 
-This software validates the presence/absence of SNPs based on SAM-format alignments
+Software for calling small variants (or validating existing calls) in a small genome
 
-## Compilation
+## Compilation (all software)
 
 ```
 javac src/*.java
+
 ```
 
-## Running
+## CallVariants
+
+This software uses the output of samtools mpileup to call variants based on simple allele frequency thresholds.
+
+### Running
+
+```
+Usage: java -cp src CallVariants [args]
+  Example: java -cp src CallVariants pileup_file=jhu004.mpileup out_file=calls.vcf
+
+Required args:
+  pileup_file (String) - the output of samtools mpileup with the read alignments and reference
+  out_file    (String) - the output file to call SNPs
+
+Optional args:
+  coverage_threshold  (int)    [20]    - the min coverage needed to possibly flag a region
+  genome_max_len      (int)    [31000] - an upper bound on the genome length
+  alt_threshold       (float)  [0.15]   - call a variant if any alt allele frequency > this value
+  ref_threshold       (float)  [0.60]   - call an N even if no alt allele frequency is high enough if ref allele frequency < this value)
+```
+
+## CheckVariants
+
+This software validates the presence/absence of SNPs based on SAM-format alignments
+
+### Running
 
 ```
 Usage: java -cp src CheckVariants [args]
