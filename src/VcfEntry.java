@@ -29,7 +29,7 @@ public class VcfEntry implements Comparable<VcfEntry>
 			throw new Exception("VCF line had too few entries: "
 					+ Arrays.toString(tabTokens));
 		}
-		key = getChromosome() + "_" + getPos() + "_" + getAlt();
+		key = getChromosome() + "_" + String.format("%08d", getPos()) + "_" + getAlt();
 	}
 	
 	/*
