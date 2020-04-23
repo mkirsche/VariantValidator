@@ -71,6 +71,14 @@ public class CheckVariants {
 				{
 					maxLen = Integer.parseInt(val);
 				}
+				else if(key.equals("missed_variant_freq"))
+				{
+					fnThreshold = Double.parseDouble(val);
+				}
+				else if(key.equals("fp_freq"))
+				{
+					fpThreshold = Double.parseDouble(val);
+				}
 			}
 		}
 		if(samFn.length() == 0 || vcfFn.length() == 0 || genomeFn.length() == 0)
