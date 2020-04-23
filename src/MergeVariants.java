@@ -22,8 +22,6 @@ public class MergeVariants
 		System.out.println("Required args:");
 		System.out.println("  file_list    (String) - a txt file containing absolute paths to VCF files, one on each line");
 		System.out.println("  out_file    (String) - file to write merged variants to");
-		System.out.println();
-		System.out.println("Optional args:");
 
 		System.out.println();
 	}
