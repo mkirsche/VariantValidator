@@ -86,6 +86,13 @@ public class MergeVariants
 		
 		PrintWriter out = new PrintWriter(new File(ofn));
 		
+		String files = "";
+		for(int i = 0; i<vcfs.length; i++)
+		{
+			files += vcfs[i];
+			if(i<vcfs.length - 1) files += ",";
+		}
+		out.println("##filelist=" + files);
 		for(VcfEntry entry : vars)
 		{
 			char[] suppVec = new char[numSamples];
