@@ -49,6 +49,10 @@ Required args:
 
 Inputs are `sample.fa`, `sample.vcf` from some variant caller, and `sample.bam`.
 
+Note: This pipeline has been implemented in run.sh which takes the following parameters:
+
+`./run.sh <reference> <bam alignments> <vcf variant calls> <output prefix>`
+
 ```
 samtools mpileup --reference sample.fa sample.bam -o sample.mpileup
 javac src/*.java
