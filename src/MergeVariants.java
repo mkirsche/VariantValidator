@@ -67,16 +67,22 @@ public class MergeVariants
 				{
 					continue;
 				}
-				VcfEntry v = new VcfEntry(line);
-				v.support.add(i);
+				VcfEntry entry = new VcfEntry(line);
 				
-				if(vars.contains(v))
+				VcfEntry[] splitEntries = split(entry);
+				
+				for(VcfEntry v : splitEntries)
 				{
-					vars.floor(v).merge(v);
-				}
-				else
-				{
-					vars.add(v);
+					v.support.add(i);
+					
+					if(vars.contains(v))
+					{
+						vars.floor(v).merge(v);
+					}
+					else
+					{
+						vars.add(v);
+					}
 				}
 			}
 			input.close();
@@ -108,6 +114,29 @@ public class MergeVariants
 		}
 		
 		out.close();
+	}
+	
+	/*
+	 * Splits an entry if it has reflen and altlen equal and greater than 1
+	 */
+	static VcfEntry[] split(VcfEntry entry) throws Exception
+	{
+		if(entry.getRef().length() == 1 || entry.getRef().length() != entry.getAlt().length())
+		{
+			return new VcfEntry[] {entry};
+		}
+		VcfEntry[] res = new VcfEntry[entry.getRef().length()];
+		for(int i = 0; i<res.length; i++)
+		{
+			VcfEntry cur = new VcfEntry(entry.toString());
+			cur.setRef(entry.getRef().charAt(i) + "");
+			cur.setAlt(entry.getAlt().charAt(i) + "");
+			cur.setPos(entry.getPos() + i);
+			cur.setId(entry.getId() + "_" + i);
+			cur.setKey();
+			res[i] = cur;
+		}
+		return res;
 	}
 	
 	static String[] getFilesFromList() throws Exception
