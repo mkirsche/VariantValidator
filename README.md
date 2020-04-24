@@ -49,20 +49,8 @@ Required args:
 
 Inputs are `sample.fa`, `sample.vcf` from some variant caller, and `sample.bam`.
 
-Note: This pipeline has been implemented in run.sh which takes the following parameters:
+The variant calling/merging pipeline has been implemented in run.sh which takes the following parameters:
 
-`./run.sh <reference> <bam alignments> <vcf variant calls> <output prefix>`
+`./run.sh <reference> <bam alignments> <vcf variant calls, different files separated by commas> <output prefix>`
 
-```
-samtools mpileup --reference sample.fa sample.bam -o sample.mpileup
-javac src/*.java
-java -cp src CallVariants pileup_file=sample.mpileup out_file=allele_freq_calls.vcf
-# Print out vcf filenames with absolute paths to filelist.txt
-readlink -f sample.vcf > filelist.txt
-readlink -f allele_freq_calls.vcf >> filelist.txt
-java -cp src MergeVariants file_list=filelist.txt out_file=merged.vcf
-# Print possible false positives
-cat merged.vcf | grep 'SUPP_VEC=10'
-# Print possible false negatives
-cat merged.vcf | grep 'SUPP_VEC=01'
-```
+

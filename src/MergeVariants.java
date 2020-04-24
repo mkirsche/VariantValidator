@@ -99,7 +99,7 @@ public class MergeVariants
 			if(i<vcfs.length - 1) files += ",";
 		}
 		out.println("##filelist=" + files);
-		out.println("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO");
+		out.println("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample");
 		for(VcfEntry entry : vars)
 		{
 			char[] suppVec = new char[numSamples];
@@ -114,8 +114,9 @@ public class MergeVariants
 			String[] tokens = entry.tabTokens;
 			for(int i = 0; i<8; i++)
 			{
-				out.print(tokens[i] + (i == 7 ? "\n" : "\t"));
+				out.print(tokens[i] + "\t");
 			}
+			out.print("GT\t1\n");
 		}
 		
 		out.close();
