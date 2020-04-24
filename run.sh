@@ -1,4 +1,8 @@
-BINDIR=`pwd`
+if [ "$(uname -s)" = 'Linux' ]; then
+    BINDIR=$(dirname "$(readlink -f "$0" || echo "$(echo "$0" | sed -e 's,\\,/,g')")")
+else
+    BINDIR=$(dirname "$(readlink "$0" || echo "$(echo "$0" | sed -e 's,\\,/,g')")")
+fi
 ref=$1
 bam=$2
 vcfs=$3
@@ -18,8 +22,6 @@ javac $BINDIR/src/*.java
 java -cp $BINDIR/src CallVariants pileup_file=$mpileup out_file=$allelefreqcalls
 
 # Print out vcf filenames with absolute paths to filelist
-IN="bla@some.com;john@home.com"
-
 vcfarray=$(echo $vcfs | tr "," "\n")
 
 # Output vcf filenames to a list
