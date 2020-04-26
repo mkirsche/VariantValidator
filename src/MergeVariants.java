@@ -17,7 +17,7 @@ public class MergeVariants
 	static void usage()
 	{
 		System.out.println("Usage: java -cp src MergeVariants [args]");
-		System.out.println("  Example: java -cp src MergeVariants filelist=vcflist.txt out_file=merged.vcf");
+		System.out.println("  Example: java -cp src MergeVariants file_list=vcflist.txt out_file=merged.vcf");
 		System.out.println();
 		System.out.println("Required args:");
 		System.out.println("  file_list    (String) - a txt file containing absolute paths to VCF files, one on each line");
@@ -99,7 +99,7 @@ public class MergeVariants
 			if(i<vcfs.length - 1) files += ",";
 		}
 		out.println("##filelist=" + files);
-		out.println("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample");
+		out.println("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO");
 		for(VcfEntry entry : vars)
 		{
 			char[] suppVec = new char[numSamples];
@@ -114,9 +114,8 @@ public class MergeVariants
 			String[] tokens = entry.tabTokens;
 			for(int i = 0; i<8; i++)
 			{
-				out.print(tokens[i] + "\t");
+				out.print(tokens[i] + (i == 7 ? "\n" : "\t"));
 			}
-			out.print("GT\t1\n");
 		}
 		
 		out.close();

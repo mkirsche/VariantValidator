@@ -50,3 +50,6 @@ cat $outpref.merged.vcf | grep 'SUPP_VEC=100;' >> $outpref.check.txt
 cat $outpref.merged.vcf | grep 'SUPP_VEC=011;' >> $outpref.check.txt
 cat $outpref.merged.vcf | grep 'SUPP_VEC=010;' >> $outpref.check.txt
 cat $outpref.merged.vcf | grep 'SUPP_VEC=001;' >> $outpref.check.txt
+
+# Run merging
+java -cp $BINDIR/src CombineVariants vcf_file=$outpref.merged.vcf out_file=$outpref.combined.vcf

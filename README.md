@@ -32,7 +32,7 @@ Optional args:
 
 ## MergeVariants
 
-This software merges VCFs from multiple sources
+This software merges VCFs from multiple sources.
 
 ### Running
 
@@ -43,6 +43,21 @@ Usage: java -cp src MergeVariants [args]
 Required args:
   file_list   (String) - a txt file containing absolute paths to VCF files, one on each line
   out_file    (String) - file to write merged variants to
+ ```
+
+## CombineVariants
+
+This software takes a merged VCF and combines variants in adjacent positions.
+
+### Running
+
+```
+Usage: java -cp src CombineVariants [args]
+  Example: java -cp src CombineVariants vcf_file=merged.vcf out_file=merged_combined.vcf
+
+Required args:
+  vcf_file    (String) - vcf file containing the variants after merging across samples
+  out_file    (String) - file to output variants after combining adjact positions
  ```
 
 ## Recommended Pipeline
