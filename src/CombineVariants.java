@@ -193,6 +193,12 @@ public class CombineVariants
 			copy.setRef(new String(refs));
 			copy.setAlt(s);
 			
+			// Ignore samples with no variants
+			if(copy.getRef().equals(copy.getAlt()))
+			{
+				continue;
+			}
+			
 			char[] suppVec = new char[numSamples];
 			Arrays.fill(suppVec, '0');
 			for(int sampleId : altMap.get(s))
