@@ -145,6 +145,28 @@ public class CombineVariants
 		
 		int numSamples = entries.get(0).getInfo("SUPP_VEC").length();
 		
+		if(numSamples == 0)
+		{
+			char[] alt = new char[maxPos - minPos + 1];
+			for(int i = 0; i<alt.length; i++)
+			{
+				alt[i] = refs[i];
+			}
+			for(VcfEntry entry : entries)
+			{
+				
+				for(int i = 0; i<entry.getAlt().length(); i++)
+				{
+					alt[i + entry.getPos() - minPos] = entry.getAlt().charAt(i);
+				}
+			}
+			
+			VcfEntry copy = new VcfEntry(entries.get(0).originalLine);
+			copy.setRef(new String(refs));
+			copy.setAlt(new String(alt));
+			out.println(copy);
+		}
+		
 		// Create an alt sequence for each sample
 		char[][] alts = new char[numSamples][maxPos - minPos + 1];
 		
