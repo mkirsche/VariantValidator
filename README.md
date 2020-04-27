@@ -60,6 +60,23 @@ Required args:
   out_file    (String) - file to output variants after combining adjact positions
  ```
 
+## TableToVcf
+
+This software takes a post-filtered TSV and creates 2 VCF files - one with all variants and one with consensus variants
+
+### Running
+
+```
+Usage: java -cp src TableToVcf [args]
+  Example: java -cp src TableToVcf table_file=merged.vcf consensus_file=consensus.vcf all_file=all.vcf
+
+Required args:
+  table_file     (String) - vcf file containing the variants after merging across samples
+  consensus_file (String) - file to output consensus variants to
+  all_file       (String) - file to output all variants to
+ ```
+
+
 ## Recommended Pipeline
 
 Inputs are `sample.fa`, `sample.vcf` from some variant caller, and `sample.bam`.
