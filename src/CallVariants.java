@@ -107,11 +107,7 @@ public static void main(String[] args) throws Exception
 		
 		String chrName = tokens[0];
 		int refPos = Integer.parseInt(tokens[1]) - 1;
-		
-		if(refPos == 21147)
-		{
-			System.out.println(line);
-		}
+
 		char refChar = tokens[2].charAt(0);
 		
 		if(!cov.containsKey(chrName))
