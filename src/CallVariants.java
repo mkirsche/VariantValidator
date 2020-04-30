@@ -93,7 +93,7 @@ public static void main(String[] args) throws Exception
 	// Parse the cigar strings of read alignments and count up allele frequencies 
 	System.err.println("Counting coverage from alignments");
 	Scanner input = new Scanner(new FileInputStream(new File(pileupFn)));
-	HashMap<String, int[][]> cov = new HashMap<String, int[][]>();
+	HashMap<String, int[][][]> cov = new HashMap<String, int[][][]>();
 	HashMap<String, char[]> genome = new HashMap<String, char[]>();
 	while(input.hasNext())
 	{
@@ -102,21 +102,27 @@ public static void main(String[] args) throws Exception
 		{
 			continue;
 		}
+		//System.out.println(line);
 		String[] tokens = line.split("\t");
 		
 		String chrName = tokens[0];
 		int refPos = Integer.parseInt(tokens[1]) - 1;
+		
+		if(refPos == 21147)
+		{
+			System.out.println(line);
+		}
 		char refChar = tokens[2].charAt(0);
 		
 		if(!cov.containsKey(chrName))
 		{
-			cov.put(chrName, new int[maxLen][7]);
+			cov.put(chrName, new int[maxLen][3][5]);
 			genome.put(chrName, new char[maxLen]);
 		}
 		
 		genome.get(chrName)[refPos] = refChar;
 		
-		int[][] covArray = cov.get(chrName);
+		int[][][] covArray = cov.get(chrName);
 		
 		covArray[refPos] = getAlleleFreqs(refChar, tokens[4]);
 	}
@@ -132,12 +138,12 @@ public static void main(String[] args) throws Exception
 	for(String s : cov.keySet())
 	{
 		// Get an array of allele frequencies for this contig
-		int[][] covArray = cov.get(s);
+		int[][][] covArray = cov.get(s);
 		for(int i = 0; i<covArray.length; i++)
 		{
 			// Total coverage over this position only counting matches/mismatches
 			int totalCov = 0;
-			for(int j = 0; j<5; j++) totalCov += covArray[i][j];
+			for(int j = 0; j<5; j++) totalCov += covArray[i][0][j];
 			
 			if(totalCov < covThreshold) continue;
 			
@@ -148,10 +154,10 @@ public static void main(String[] args) throws Exception
 			int alt = -1;
 			for(int j = 0; j<4; j++)
 			{
-				if(j != refChar && covArray[i][j] >= totalCov * altThreshold)
+				if(j != refChar && covArray[i][0][j] >= totalCov * altThreshold)
 				{
 					// Just in case multiple alts qualify, take the more frequent one
-					if(alt != -1 && covArray[i][alt] > covArray[i][j])
+					if(alt != -1 && covArray[i][0][alt] > covArray[i][0][j])
 					{
 						continue;
 					}
@@ -159,7 +165,7 @@ public static void main(String[] args) throws Exception
 				}
 			}
 			
-			if(alt == -1 && covArray[i][refChar] < totalCov * refThreshold)
+			if(alt == -1 && covArray[i][0][refChar] < totalCov * refThreshold)
 			{
 				System.out.println(Arrays.toString(covArray[i])+" "+refChar);
 				alt = 4;
@@ -167,7 +173,13 @@ public static void main(String[] args) throws Exception
 			
 			if(alt != -1)
 			{
-				out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+				int totalPositive = 0, totalNegative = 0;
+				for(int j = 0; j<5; j++)
+				{
+					totalPositive += covArray[i][1][j];
+					totalNegative += covArray[i][2][j];
+				}
+				out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s;%s\n",
 						s,
 						i+1,
 						"var" + varId,
@@ -175,7 +187,8 @@ public static void main(String[] args) throws Exception
 						intToChar(alt),
 						".",
 						".",
-						"AF=" + String.format("%.6f", 1.0 * covArray[i][alt] / totalCov));
+						"AF=" + String.format("%.6f", 1.0 * covArray[i][0][alt] / totalCov),
+						"STRANDAF=" + String.format("%d,%d,%d,%d", covArray[i][1][alt], totalPositive, covArray[i][2][alt], totalNegative));
 				varId++;
 			}
 		}
@@ -187,17 +200,29 @@ public static void main(String[] args) throws Exception
 /*
  * Gets the number of A/C/G/T/N's covering a position from an mpileup string
  */
-static int[] getAlleleFreqs(char refChar, String pileup)
+static int[][] getAlleleFreqs(char refChar, String pileup)
 {
-	int[] res = new int[5];
+	int[][] res = new int[3][5];
+	for(int i = 0; i<res.length; i++)
+	{
+		res[i] = new int[5];
+	}
 	for(int i = 0; i<pileup.length(); i++)
 	{
 		char c = pileup.charAt(i);
 		
-		// Exact macth so use ref character
+		// Exact match so use ref character
 		if(c == '.' || c == ',')
 		{
-			res[charToInt(refChar)]++;
+			res[0][charToInt(refChar)]++;
+			if(c == '.')
+			{
+				res[1][charToInt(refChar)]++;
+			}
+			else
+			{
+				res[2][charToInt(refChar)]++;
+			}
 		}
 		
 		// Insertion or deletion after this base so ignore
@@ -232,7 +257,16 @@ static int[] getAlleleFreqs(char refChar, String pileup)
 			int val = charToInt(c);
 			if(val != -1)
 			{
-				res[charToInt(c)]++;
+				res[0][charToInt(c)]++;
+				
+				if(Character.isUpperCase(c) || c == '>')
+				{
+					res[1][charToInt(c)]++;
+				}
+				if(Character.isLowerCase(c) || c == '<')
+				{
+					res[2][charToInt(c)]++;
+				}
 			}
 		}
 	}
@@ -248,7 +282,7 @@ static int charToInt(char c)
 	else if(c == 'c' || c == 'C') return 1;
 	else if(c == 'g' || c == 'G') return 2;
 	else if(c == 't' || c == 'T') return 3;
-	else if(c == '>' || c == '<') return 4;
+	else if(c == '>' || c == '<' || c == 'n' || c == 'N') return 4;
 	else return -1;
 }
 
