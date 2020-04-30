@@ -4,8 +4,8 @@
  * to do more parsing and error-checking for things like type and length.
  */
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,11 +17,11 @@ public class VcfEntry implements Comparable<VcfEntry>
 	String oldId;
 	String key;
 	
-	ArrayList<Integer> support;
+	HashSet<Integer> support;
 	
 	public VcfEntry(String line) throws Exception
 	{
-		support = new ArrayList<Integer>();
+		support = new HashSet<Integer>();
 		originalLine = line;
 		tabTokens = line.split("\t");
 		if(tabTokens.length < 8)

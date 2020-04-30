@@ -14,6 +14,7 @@ public class CallVariants {
 	static int covThreshold = 20;
 	static double refThreshold = .6;
 	static double altThreshold = .15;
+	static String flagPrefix = "";
 	
 	/*
 	 * Prints out usage instructions
@@ -31,8 +32,9 @@ public class CallVariants {
 		System.out.println("Optional args:");
 		System.out.println("  coverage_threshold  (int)    [20]    - the min coverage needed to possibly flag a region");
 		System.out.println("  genome_max_len      (int)    [31000] - an upper bound on the genome length");
-		System.out.println("  alt_threshold       (float)  [0.15]   - call a variant if any alt allele frequency > this value");
-		System.out.println("  ref_threshold       (float)  [0.60]   - call an N even if no alt allele frequency is high enough if ref allele frequency < this value)");
+		System.out.println("  alt_threshold       (float)  [0.15]  - call a variant if any alt allele frequency > this value");
+		System.out.println("  ref_threshold       (float)  [0.60]  - call an N even if no alt allele frequency is high enough if ref allele frequency < this value");
+		System.out.println("  flag_prefix         (String) []      - add this to AF and STRANDAF flag names");
 
 		System.out.println();
 	}
@@ -77,6 +79,10 @@ public class CallVariants {
 				else if(key.equals("coverage_threshold"))
 				{
 					covThreshold = Integer.parseInt(val);
+				}
+				else if(key.equals("flag_prefix"))
+				{
+					flagPrefix = val;
 				}
 			}
 		}
@@ -183,8 +189,8 @@ public static void main(String[] args) throws Exception
 						intToChar(alt),
 						".",
 						".",
-						"AF=" + String.format("%.6f", 1.0 * covArray[i][0][alt] / totalCov),
-						"STRANDAF=" + String.format("%d,%d,%d,%d", covArray[i][1][alt], totalPositive, covArray[i][2][alt], totalNegative));
+						flagPrefix + "AF=" + String.format("%.6f", 1.0 * covArray[i][0][alt] / totalCov),
+						flagPrefix + "STRANDAF=" + String.format("%d,%d,%d,%d", covArray[i][1][alt], totalPositive, covArray[i][2][alt], totalNegative));
 				varId++;
 			}
 		}
