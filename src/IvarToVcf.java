@@ -1,5 +1,5 @@
 /*
- * Converts a post-filtering TSV to two separate VCFs - one with all variants and one with only consensus variants
+ * Converts an iVar TSV to a VCF
  */
 
 import java.io.File;
@@ -9,22 +9,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class TableToVcf
+public class IvarToVcf
 {
-	static String tableFn = "", consensusFn = "", allFn = "";
+	static String tableFn = "", ofn = "";
 	
 	/*
 	 * Prints usage message
 	 */
 	static void usage()
 	{
-		System.out.println("Usage: java -cp src TableToVcf [args]");
-		System.out.println("  Example: java -cp src TableToVcf table_file=postfilter.txt consensus_file=consensus.vcf all_file=all.vcf");
+		System.out.println("Usage: java -cp src IvarToVcf [args]");
+		System.out.println("  Example: java -cp src IvarToVcf table_file=ivar.tsv out_file=all.vcf");
 		System.out.println();
 		System.out.println("Required args:");
-		System.out.println("  table_file     (String) - table containing postfiltered variant information");
-		System.out.println("  consensus_file (String) - file to output consensus variants to");
-		System.out.println("  all_file       (String) - file to output all variants to");
+		System.out.println("  table_file     (String) - tsv output from ivar variant caller");
+		System.out.println("  out_file       (String) - vcf file to output all variants to");
 		System.out.println();
 	}
 	
@@ -45,13 +44,12 @@ public class TableToVcf
 				String key = s.substring(0, equalsIdx);
 				String val = s.substring(1 + equalsIdx);
 				if(key.equalsIgnoreCase("table_file")) { tableFn = val; }
-				else if(key.equalsIgnoreCase("consensus_file")) { consensusFn = val; } 
-				else if(key.equalsIgnoreCase("all_file")) { allFn = val; } 
+				else if(key.equalsIgnoreCase("out_file")) { ofn = val; } 
 
 			}
 		}
 		
-		if(tableFn.length() == 0 || consensusFn.length() == 0 || allFn.length() == 0)
+		if(tableFn.length() == 0 || ofn.length() == 0)
 		{
 			usage();
 			System.exit(1);
@@ -70,22 +68,18 @@ public class TableToVcf
 		}
 		input.close();
 		
-		PrintWriter consensusOut = new PrintWriter(new File(consensusFn));
-		PrintWriter allOut = new PrintWriter(new File(allFn));
+		PrintWriter out = new PrintWriter(new File(ofn));
 		
 		// Print VCF headers
-		printVcfHeader(consensusOut);
-		printVcfHeader(allOut);
+		printVcfHeader(out);
 		
 		// Print VCF entries based on the table
 		for(int i = 0; i<variantTable.rows.size(); i++)
 		{
-			variantTable.printRowVcf(i, consensusOut, true);
-			variantTable.printRowVcf(i, allOut, false);
+			variantTable.printRowVcf(i, out, false);
 		}
 		
-		consensusOut.close();
-		allOut.close();
+		out.close();
 	}
 	
 	/*
@@ -151,19 +145,25 @@ public class TableToVcf
 		 */
 		void printRowVcf(int rowIndex, PrintWriter out, boolean consensusOnly)
 		{
-			boolean inConsensus = getValue(rowIndex, "in_consensus").equalsIgnoreCase("true");
-			if(!inConsensus && consensusOnly)
-			{
-				return;
-			}
-			String chr = getValue(rowIndex, "chrom");
+			String chr = getValue(rowIndex, "region");
 			int pos = Integer.parseInt(getValue(rowIndex, "pos"));
 			String ref = getValue(rowIndex, "ref");
 			String alt = getValue(rowIndex, "alt");
 			String id = ".";
 			String filter = ".";
 			String qual = ".";
-			String info = ".";
+			String info = String.format("IVAR_REF_DP=%s;IVAR_REF_RV=%s;IVAR_REF_QUAL=%s;IVAR_ALT_DP=%s;IVAR_ALT_RV=%s;"
+					+ "IVER_ALT_QUAL=%s;IVAR_ALT_FREQ=%s;IVAR_TOTAL_DP=%s;IVAR_PVAL=%s",
+					getValue(rowIndex, "ref_dp"),
+					getValue(rowIndex, "ref_rv"),
+					getValue(rowIndex, "ref_qual"),
+					getValue(rowIndex, "alt_dp"),
+					getValue(rowIndex, "alt_rv"),
+					getValue(rowIndex, "alt_qual"),
+					getValue(rowIndex, "alt_freq"),
+					getValue(rowIndex, "total_dp"),
+					getValue(rowIndex, "pval")
+			);
 			out.printf("%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n", chr, pos, id, ref, alt, qual, filter, info);
 		}
 	}
