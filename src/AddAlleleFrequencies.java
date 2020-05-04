@@ -143,6 +143,7 @@ public class AddAlleleFrequencies {
 				{
 					ontTotals[i] += x;
 				}
+				ontTotals[i] -= ontCovArray[i][5];
 			}
 			
 			// Compute Illumina depths
@@ -152,6 +153,7 @@ public class AddAlleleFrequencies {
 				{
 					illuminaTotals[i] += x;
 				}
+				illuminaTotals[i] -= illuminaCovArray[i][5];
 			}
 			
 			// ONT alt allele frequency - handle case with zero depth

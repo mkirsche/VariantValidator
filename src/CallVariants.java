@@ -145,7 +145,7 @@ public static void main(String[] args) throws Exception
 		{
 			// Total coverage over this position only counting matches/mismatches
 			int totalCov = 0;
-			for(int j = 0; j<covArray[i][0].length; j++) totalCov += covArray[i][0][j];
+			for(int j = 0; j<5; j++) totalCov += covArray[i][0][j];
 			
 			if(totalCov < covThreshold) continue;
 			
@@ -167,7 +167,7 @@ public static void main(String[] args) throws Exception
 				}
 			}
 			
-			if(alt == -1 && covArray[i][0][refChar] < (totalCov - covArray[i][0][5]) * refThreshold)
+			if(alt == -1 && covArray[i][0][refChar] < (totalCov) * refThreshold)
 			{
 				System.out.println("Calling N at " + i + " " + Arrays.toString(covArray[i][0]) + " " + refChar);
 				alt = 4;
@@ -190,7 +190,8 @@ public static void main(String[] args) throws Exception
 						".",
 						".",
 						flagPrefix + "AF=" + String.format("%.6f", 1.0 * covArray[i][0][alt] / totalCov),
-						flagPrefix + "STRANDAF=" + String.format("%d,%d,%d,%d", covArray[i][1][alt], totalPositive, covArray[i][2][alt], totalNegative));
+						flagPrefix + "STRANDAF=" + String.format("%d,%d,%d,%d", 
+								covArray[i][1][alt], totalPositive, covArray[i][2][alt], totalNegative));
 				varId++;
 			}
 		}
