@@ -169,7 +169,7 @@ public static void main(String[] args) throws Exception
 			
 			if(alt == -1 && covArray[i][0][refChar] < totalCov * refThreshold)
 			{
-				System.out.println(Arrays.toString(covArray[i])+" "+refChar);
+				System.out.println("Calling N at " + i + " " + Arrays.toString(covArray[i][0]) + " " + refChar);
 				alt = 4;
 			}
 			
