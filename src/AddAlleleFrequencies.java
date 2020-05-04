@@ -102,6 +102,23 @@ public class AddAlleleFrequencies {
 		String chrName = entry.getChromosome();
 		int position = entry.getPos() - 1;
 		
+		boolean inIllumina = illuminaMpileup.allFrequencies.containsKey(chrName);
+		boolean inOnt = ontMpileup.allFrequencies.containsKey(chrName);
+		if(!inIllumina && !inOnt)
+		{
+			return;
+		}
+		else if(!inIllumina)
+		{
+			int[][][] ontData = ontMpileup.allFrequencies.get(chrName);
+			illuminaMpileup.allFrequencies.put(chrName, new int[ontData.length][ontData[0].length][ontData[0][0].length]);
+		}
+		else if(!inOnt)
+		{
+			int[][][] illuminaData = illuminaMpileup.allFrequencies.get(chrName);
+			ontMpileup.allFrequencies.put(chrName, new int[illuminaData.length][illuminaData[0].length][illuminaData[0][0].length]);
+		}
+		
 		// Get the mpileup data for this specific position
 		int[][] illuminaCovArray = illuminaMpileup.allFrequencies.get(chrName)[position];
 		int[][] ontCovArray = ontMpileup.allFrequencies.get(chrName)[position];
@@ -175,21 +192,21 @@ public class AddAlleleFrequencies {
 			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
 					ontCovArray[1][0], ontCovArray[1][1], 
 					ontCovArray[1][2], ontCovArray[1][3], 
-					ontCovArray[1][4]));
+					ontCovArray[1][4], ontCovArray[1][5]));
 			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
 					ontCovArray[2][0], ontCovArray[2][1], 
 					ontCovArray[2][2], ontCovArray[2][3], 
-					ontCovArray[2][4]));
+					ontCovArray[2][4], ontCovArray[2][5]));
 			
 			// Set fields for all alleles on each strand of Illumina
 			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
 					illuminaCovArray[1][0], illuminaCovArray[1][1], 
 					illuminaCovArray[1][2], illuminaCovArray[1][3], 
-					illuminaCovArray[1][4]));
+					illuminaCovArray[1][4], illuminaCovArray[1][5]));
 			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
 					illuminaCovArray[2][0], illuminaCovArray[2][1], 
 					illuminaCovArray[2][2], illuminaCovArray[2][3], 
-					illuminaCovArray[2][4]));
+					illuminaCovArray[2][4], illuminaCovArray[2][5]));
 		}
 		
 		else
@@ -199,10 +216,10 @@ public class AddAlleleFrequencies {
 			entry.setInfo("STRANDAF", "0,0,0,0");
 			entry.setInfo("ILLUMINA_AF", "0");
 			entry.setInfo("ILLUMINASTRANDAF", "0,0,0,0");
-			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0");
-			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0");
-			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0");
-			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0");
+			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
 		}
 
 	}
@@ -239,7 +256,7 @@ public class AddAlleleFrequencies {
 				
 				if(!allFrequencies.containsKey(chrName))
 				{
-					allFrequencies.put(chrName, new int[maxLen][3][5]);
+					allFrequencies.put(chrName, new int[maxLen][3][6]);
 				}
 				
 				// Fill the frequency array at this position

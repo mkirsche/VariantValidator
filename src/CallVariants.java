@@ -118,7 +118,7 @@ public static void main(String[] args) throws Exception
 		
 		if(!cov.containsKey(chrName))
 		{
-			cov.put(chrName, new int[maxLen][3][5]);
+			cov.put(chrName, new int[maxLen][3][6]);
 			genome.put(chrName, new char[maxLen]);
 		}
 		
@@ -145,7 +145,7 @@ public static void main(String[] args) throws Exception
 		{
 			// Total coverage over this position only counting matches/mismatches
 			int totalCov = 0;
-			for(int j = 0; j<5; j++) totalCov += covArray[i][0][j];
+			for(int j = 0; j<covArray[i][0].length; j++) totalCov += covArray[i][0][j];
 			
 			if(totalCov < covThreshold) continue;
 			
@@ -176,7 +176,7 @@ public static void main(String[] args) throws Exception
 			if(alt != -1)
 			{
 				int totalPositive = 0, totalNegative = 0;
-				for(int j = 0; j<5; j++)
+				for(int j = 0; j<covArray[i][1].length; j++)
 				{
 					totalPositive += covArray[i][1][j];
 					totalNegative += covArray[i][2][j];
@@ -204,10 +204,10 @@ public static void main(String[] args) throws Exception
  */
 static int[][] getAlleleFreqs(char refChar, String pileup)
 {
-	int[][] res = new int[3][5];
+	int[][] res = new int[3][6];
 	for(int i = 0; i<res.length; i++)
 	{
-		res[i] = new int[5];
+		res[i] = new int[6];
 	}
 	for(int i = 0; i<pileup.length(); i++)
 	{
@@ -237,7 +237,29 @@ static int[][] getAlleleFreqs(char refChar, String pileup)
 				end++;
 				length = length * 10 + pileup.charAt(end) - '0';
 			}
+			boolean capital = (pileup.charAt(end+1) >= 'A' && pileup.charAt(end+1) <= 'Z') || pileup.charAt(end+1) == '*';
 			i = end + length;
+			res[0][5]++;
+			if(capital)
+			{
+				res[1][5]++;
+			}
+			else
+			{
+				res[2][5]++;
+			}
+		}
+		
+		else if(c == '*')
+		{
+			res[0][5]++;
+			res[1][5]++;
+		}
+		
+		else if(c == '#')
+		{
+			res[0][5]++;
+			res[2][5]++;
 		}
 		
 		// Last character indicator - ignore
