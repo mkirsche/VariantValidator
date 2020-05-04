@@ -14,6 +14,9 @@ public class MergeVariants
 	// File to print merged variants to
 	static String ofn = "";
 	
+	// Bam file with illumina reads
+	static String illuminaBam = "";
+	
 	static void usage()
 	{
 		System.out.println("Usage: java -cp src MergeVariants [args]");
@@ -21,8 +24,10 @@ public class MergeVariants
 		System.out.println();
 		System.out.println("Required args:");
 		System.out.println("  file_list    (String) - a txt file containing absolute paths to VCF files, one on each line");
-		System.out.println("  out_file    (String) - file to write merged variants to");
-
+		System.out.println("  out_file     (String) - file to write merged variants to");
+		System.out.println();
+		System.out.println("Optional args:");
+		System.out.println("  illumina_bam (String) - a filename which will be added to the header as ILLUMINABAM");
 		System.out.println();
 	}
 	
@@ -41,6 +46,8 @@ public class MergeVariants
 				String val = s.substring(1 + equalsIdx);
 				if(key.equalsIgnoreCase("file_list")) { fileList = val; }
 				else if(key.equalsIgnoreCase("out_file")) { ofn = val; } 
+				else if(key.equalsIgnoreCase("illumina_bam")) { illuminaBam = val; } 
+
 			}
 		}
 		
@@ -99,6 +106,10 @@ public class MergeVariants
 			if(i<vcfs.length - 1) files += ",";
 		}
 		out.println("##filelist=" + files);
+		if(illuminaBam.length() > 0)
+		{
+			out.println("##ILLUMINABAM=" + illuminaBam);
+		}
 		out.println("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO");
 		for(VcfEntry entry : vars)
 		{
