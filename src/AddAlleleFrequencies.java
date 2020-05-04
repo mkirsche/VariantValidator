@@ -191,21 +191,21 @@ public class AddAlleleFrequencies {
 			entry.setInfo("ILLUMINA_STRANDAF", illuminaStrandBias);
 			
 			// Set fields for all alleles on each strand of ONT
-			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
+			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
 					ontCovArray[1][0], ontCovArray[1][1], 
 					ontCovArray[1][2], ontCovArray[1][3], 
 					ontCovArray[1][4], ontCovArray[1][5]));
-			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
+			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
 					ontCovArray[2][0], ontCovArray[2][1], 
 					ontCovArray[2][2], ontCovArray[2][3], 
 					ontCovArray[2][4], ontCovArray[2][5]));
 			
 			// Set fields for all alleles on each strand of Illumina
-			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
+			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
 					illuminaCovArray[1][0], illuminaCovArray[1][1], 
 					illuminaCovArray[1][2], illuminaCovArray[1][3], 
 					illuminaCovArray[1][4], illuminaCovArray[1][5]));
-			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d",
+			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
 					illuminaCovArray[2][0], illuminaCovArray[2][1], 
 					illuminaCovArray[2][2], illuminaCovArray[2][3], 
 					illuminaCovArray[2][4], illuminaCovArray[2][5]));
