@@ -239,7 +239,7 @@ public class AddAlleleFrequencies {
 				
 				if(!allFrequencies.containsKey(chrName))
 				{
-					allFrequencies.put(chrName, new int[maxLen][][]);
+					allFrequencies.put(chrName, new int[maxLen][3][5]);
 				}
 				
 				// Fill the frequency array at this position
