@@ -167,7 +167,7 @@ public static void main(String[] args) throws Exception
 				}
 			}
 			
-			if(alt == -1 && covArray[i][0][refChar] < totalCov * refThreshold)
+			if(alt == -1 && covArray[i][0][refChar] < (totalCov - covArray[i][0][5]) * refThreshold)
 			{
 				System.out.println("Calling N at " + i + " " + Arrays.toString(covArray[i][0]) + " " + refChar);
 				alt = 4;
