@@ -37,7 +37,10 @@ done
 readlink -f $allelefreqcalls >> $filelist
 
 # Run merging
-java -cp $BINDIR/src MergeVariants illumina_bam=None file_list=$filelist out_file=$outpref.all_callers.combined.vcf
+java -cp $BINDIR/src MergeVariants illumina_bam=None file_list=$filelist out_file=$outpref.all_callers.combined.noallelefreqs.vcf
+
+java -cp $BINDIR/src AddAlleleFrequencies vcf_file=$outpref.all_callers.combined.noallelefreqs.vcf  ont_mpileup=$mpileup out_file=$outpref.all_callers.combined.vcf
+
 # Print possible false positives
 #cat $outpref.merged.vcf | grep 'SUPP_VEC=10;' > $outpref.check.txt
 # Print possible false negatives
