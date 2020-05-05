@@ -28,9 +28,11 @@ public class AddAlleleFrequencies {
 		System.out.println();
 		System.out.println("Required args:");
 		System.out.println("  vcf_file         (String) - a VCF file with the merged variants");
-		System.out.println("  illumina_mpileup (String) - mpileup from the Illumina read alignments");
 		System.out.println("  ont_mpileup      (String) - mpileup from the Oxford Nanopore read alignments");
 		System.out.println("  out_file         (String) - file to write updated variants to");
+		System.out.println();
+		System.out.println("Optional args:");
+		System.out.println("  illumina_mpileup (String) - mpileup from the Illumina read alignments");
 		System.out.println();
 	}
 	
@@ -55,7 +57,7 @@ public class AddAlleleFrequencies {
 			}
 		}
 		
-		if(vcfFn.length() == 0 || ofn.length() == 0 || illuminaMpileupFn.length() == 0 || ontMpileupFn.length() == 0)
+		if(vcfFn.length() == 0 || ofn.length() == 0 || ontMpileupFn.length() == 0)
 		{
 			usage();
 			System.exit(1);
@@ -66,8 +68,14 @@ public class AddAlleleFrequencies {
 	{
 		parseArgs(args);
 		
-		Mpileup illuminaMpileup = new Mpileup(illuminaMpileupFn);
 		Mpileup ontMpileup = new Mpileup(ontMpileupFn);
+		
+		Mpileup illuminaMpileup = null;
+		
+		if(illuminaMpileupFn.length() > 0)
+		{
+			illuminaMpileup = new Mpileup(illuminaMpileupFn);
+		}
 		
 		Scanner input = new Scanner(new FileInputStream(new File(vcfFn)));
 		PrintWriter out = new PrintWriter(new File(ofn));
@@ -85,13 +93,90 @@ public class AddAlleleFrequencies {
 				continue;
 			}
 			VcfEntry entry = new VcfEntry(line);
-			addInfoFields(entry, illuminaMpileup, ontMpileup);
+			
+			if(illuminaMpileup == null)
+			{
+				addInfoFieldsSingle(entry, ontMpileup);
+			}
+			else
+			{
+				addInfoFields(entry, illuminaMpileup, ontMpileup);
+			}
 			out.println(entry);
 		}
 		
 		input.close();
 		out.close();
 		
+	}
+	
+	static void addInfoFieldsSingle(VcfEntry entry, Mpileup ontMpileup) throws Exception
+	{
+		String chrName = entry.getChromosome();
+		int position = entry.getPos() - 1;
+		
+		// Get the mpileup data for this specific position
+		int[][] ontCovArray = ontMpileup.allFrequencies.get(chrName)[position];
+		
+		String ref = entry.getRef();
+		String alt = entry.getAlt();
+		
+		// Ignore indels - variants with len(ref) = len(alt) were already split by merging
+		if(ref.length() == 1 && alt.length() == 1)
+		{
+			// Convert the ALT allele to an index for mpileup lookups
+			int altVal = CallVariants.charToInt(alt.charAt(0));
+			
+			// Add up total depths for each technology and strand
+			int[] ontTotals = new int[ontCovArray.length];
+			
+			// Compute ONT depths
+			for(int i = 0; i<ontCovArray.length; i++)
+			{
+				for(int x : ontCovArray[i])
+				{
+					ontTotals[i] += x;
+				}
+				ontTotals[i] -= ontCovArray[i][5];
+			}
+			
+			// ONT alt allele frequency - handle case with zero depth
+			double ontAfValue = 0;
+			if(ontTotals[0] != 0)
+			{
+				ontAfValue = 1.0 * ontCovArray[0][altVal] / ontTotals[0]; 
+			}
+			
+			// Set ONT alt allele frequency INFO field
+			String ontAf = String.format("%.6f", ontAfValue);
+			entry.setInfo("AF", ontAf);
+			
+			// Set ONT strand bias INFO field
+			String ontStrandBias = String.format("%d,%d,%d,%d", 
+					ontCovArray[1][altVal], ontTotals[1], 
+					ontCovArray[2][altVal], ontTotals[2]);
+			entry.setInfo("STRANDAF", ontStrandBias);
+			
+			// Set fields for all alleles on each strand of ONT
+			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
+					ontCovArray[1][0], ontCovArray[1][1], 
+					ontCovArray[1][2], ontCovArray[1][3], 
+					ontCovArray[1][4], ontCovArray[1][5]));
+			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
+					ontCovArray[2][0], ontCovArray[2][1], 
+					ontCovArray[2][2], ontCovArray[2][3], 
+					ontCovArray[2][4], ontCovArray[2][5]));
+			
+		}
+		
+		else
+		{
+			// For indels set everything to 0
+			entry.setInfo("AF", "0");
+			entry.setInfo("STRANDAF", "0,0,0,0");
+			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+		}
 	}
 	
 	/*
