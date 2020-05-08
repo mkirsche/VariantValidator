@@ -12,10 +12,10 @@ allelefreqcalls=$outpref.samtools.vcf
 filelist=$outpref.filelist.txt
 
 # Run samtools mpileup
-if [ ! -r $mpileup ]
-then
+#if [ ! -r $mpileup ]
+#then
   samtools mpileup --reference $ref $bam -o $mpileup
-fi
+#fi
 
 # Run samtools-based variant calling
 javac $BINDIR/src/*.java
