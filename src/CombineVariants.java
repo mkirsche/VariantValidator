@@ -257,7 +257,7 @@ public class CombineVariants
 			refs[entry.getPos() - minPos] = entry.getRef().charAt(0);
 		}
 		
-		if(genome != null)
+		if(genome != null && genome.size() > 0)
 		{
 			String chrName = entries.get(0).getChromosome();
 			for(int i = 0; i<refs.length; i++)
