@@ -57,7 +57,7 @@ public class AddAlleleFrequencies {
 			}
 		}
 		
-		if(vcfFn.length() == 0 || ofn.length() == 0 || ontMpileupFn.length() == 0)
+		if(vcfFn.length() == 0 || ofn.length() == 0 || (ontMpileupFn.length() == 0 && illuminaMpileupFn.length() == 0))
 		{
 			usage();
 			System.exit(1);
@@ -68,7 +68,12 @@ public class AddAlleleFrequencies {
 	{
 		parseArgs(args);
 		
-		Mpileup ontMpileup = new Mpileup(ontMpileupFn);
+		Mpileup ontMpileup = null;
+
+        if(ontMpileupFn.length() > 0)
+		{
+			ontMpileup = new Mpileup(ontMpileupFn);
+		}
 		
 		Mpileup illuminaMpileup = null;
 		
@@ -96,7 +101,11 @@ public class AddAlleleFrequencies {
 			
 			if(illuminaMpileup == null)
 			{
-				addInfoFieldsSingle(entry, ontMpileup);
+				addInfoFieldsSingle(entry, ontMpileup, false);
+			}
+            else if(ontMpileup == null)
+			{
+				addInfoFieldsSingle(entry, illuminaMpileup, true);
 			}
 			else
 			{
@@ -110,7 +119,7 @@ public class AddAlleleFrequencies {
 		
 	}
 	
-	static void addInfoFieldsSingle(VcfEntry entry, Mpileup ontMpileup) throws Exception
+	static void addInfoFieldsSingle(VcfEntry entry, Mpileup ontMpileup, boolean illumina) throws Exception
 	{
 		String chrName = entry.getChromosome();
 		int position = entry.getPos() - 1;
@@ -149,20 +158,20 @@ public class AddAlleleFrequencies {
 			
 			// Set ONT alt allele frequency INFO field
 			String ontAf = String.format("%.6f", ontAfValue);
-			entry.setInfo("AF", ontAf);
+			entry.setInfo(illumina ? "ILLUMINA_AF" : "AF", ontAf);
 			
 			// Set ONT strand bias INFO field
 			String ontStrandBias = String.format("%d,%d,%d,%d", 
 					ontCovArray[1][altVal], ontTotals[1], 
 					ontCovArray[2][altVal], ontTotals[2]);
-			entry.setInfo("STRANDAF", ontStrandBias);
+			entry.setInfo(illumina ? "ILLUMINA_STRANDAF" : "STRANDAF", ontStrandBias);
 			
 			// Set fields for all alleles on each strand of ONT
-			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
+			entry.setInfo(illumina ? "ILLUMINA_POSITIVE_STRAND_FREQUENCIES" : "POSITIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
 					ontCovArray[1][0], ontCovArray[1][1], 
 					ontCovArray[1][2], ontCovArray[1][3], 
 					ontCovArray[1][4], ontCovArray[1][5]));
-			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
+			entry.setInfo(illumina ? "ILLUMINA_NEGATIVE_STRAND_FREQUENCIES" : "NEGATIVE_STRAND_FREQUENCIES", String.format("%d,%d,%d,%d,%d,%d",
 					ontCovArray[2][0], ontCovArray[2][1], 
 					ontCovArray[2][2], ontCovArray[2][3], 
 					ontCovArray[2][4], ontCovArray[2][5]));
@@ -172,10 +181,10 @@ public class AddAlleleFrequencies {
 		else
 		{
 			// For indels set everything to 0
-			entry.setInfo("AF", "0");
-			entry.setInfo("STRANDAF", "0,0,0,0");
-			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
-			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("ILLUMINA_AF", "0");
+			entry.setInfo("ILLUMINA_STRANDAF", "0,0,0,0");
+			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
 		}
 	}
 	
@@ -302,7 +311,7 @@ public class AddAlleleFrequencies {
 			entry.setInfo("AF", "0");
 			entry.setInfo("STRANDAF", "0,0,0,0");
 			entry.setInfo("ILLUMINA_AF", "0");
-			entry.setInfo("ILLUMINASTRANDAF", "0,0,0,0");
+			entry.setInfo("ILLUMINA_STRANDAF", "0,0,0,0");
 			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
 			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
 			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
