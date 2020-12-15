@@ -4,6 +4,7 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -14,6 +15,7 @@ public class CallVariants {
 	static int covThreshold = 20;
 	static double refThreshold = .6;
 	static double altThreshold = .15;
+	static double indelThreshold = .4;
 	static String flagPrefix = "";
 	
 	/*
@@ -34,6 +36,7 @@ public class CallVariants {
 		System.out.println("  genome_max_len      (int)    [31000] - an upper bound on the genome length");
 		System.out.println("  alt_threshold       (float)  [0.15]  - call a variant if any alt allele frequency > this value");
 		System.out.println("  ref_threshold       (float)  [0.60]  - call an N even if no alt allele frequency is high enough if ref allele frequency < this value");
+		System.out.println("  indel_threshold       (float)  [0.40]  - call a variant an indel if no other variant is called there and indel frequency > this value");
 		System.out.println("  flag_prefix         (String) []      - add this to AF and STRANDAF flag names");
 
 		System.out.println();
@@ -72,6 +75,10 @@ public class CallVariants {
 				{
 					refThreshold = Double.parseDouble(val);
 				}
+				else if(key.equals("indel_threshold"))
+				{
+					indelThreshold = Double.parseDouble(val);
+				}
 				else if(key.equals("genome_max_len"))
 				{
 					maxLen = Integer.parseInt(val);
@@ -100,6 +107,7 @@ public static void main(String[] args) throws Exception
 	System.err.println("Counting coverage from alignments");
 	Scanner input = new Scanner(new FileInputStream(new File(pileupFn)));
 	HashMap<String, int[][][]> cov = new HashMap<String, int[][][]>();
+	HashMap<String, String[]> lines = new HashMap<String, String[]>();
 	HashMap<String, char[]> genome = new HashMap<String, char[]>();
 	while(input.hasNext())
 	{
@@ -119,6 +127,7 @@ public static void main(String[] args) throws Exception
 		if(!cov.containsKey(chrName))
 		{
 			cov.put(chrName, new int[maxLen][3][6]);
+			lines.put(chrName, new String[maxLen]);
 			genome.put(chrName, new char[maxLen]);
 		}
 		
@@ -127,6 +136,8 @@ public static void main(String[] args) throws Exception
 		int[][][] covArray = cov.get(chrName);
 		
 		covArray[refPos] = getAlleleFreqs(refChar, tokens[4]);
+		
+		lines.get(chrName)[refPos] = line;
 	}
 	input.close();
 	
@@ -145,7 +156,7 @@ public static void main(String[] args) throws Exception
 		{
 			// Total coverage over this position only counting matches/mismatches
 			int totalCov = 0;
-			for(int j = 0; j<5; j++) totalCov += covArray[i][0][j];
+			for(int j = 0; j<covArray[i][0].length; j++) totalCov += covArray[i][0][j];
 			
 			if(totalCov < covThreshold) continue;
 			
@@ -167,6 +178,26 @@ public static void main(String[] args) throws Exception
 				}
 			}
 			
+			String indelSeq = "";
+			
+			if(alt == -1 && (covArray[i][0][5] >= totalCov * indelThreshold || covArray[i][0][6] >= totalCov * indelThreshold))
+			{
+				String x = getIndelSeq(lines.get(s)[i]);
+				if(x.length() > 0)
+				{
+					if(covArray[i][0][5] >= totalCov * indelThreshold)
+					{
+						alt = 5;
+					}
+					else if(covArray[i][0][6] >= totalCov * indelThreshold)
+					{
+						alt = 6;
+					}
+					System.out.println("Indel at position " + i + ": "+Arrays.toString(covArray[i][0])+" "+totalCov);
+					indelSeq = x;
+				}
+			}
+			
 			if(alt == -1 && covArray[i][0][refChar] < (totalCov) * refThreshold)
 			{
 				System.out.println("Calling N at " + i + " " + Arrays.toString(covArray[i][0]) + " " + refChar);
@@ -181,12 +212,23 @@ public static void main(String[] args) throws Exception
 					totalPositive += covArray[i][1][j];
 					totalNegative += covArray[i][2][j];
 				}
+				String refString = genome.get(s)[i] + "";
+				String altString = intToChar(alt) + "";
+				if(alt == 6)
+				{
+					altString = refString;
+					refString = refString + indelSeq;
+				}
+				else if(alt == 5)
+				{
+					altString = refString + indelSeq;
+				}
 				out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s;%s\n",
 						s,
 						i+1,
 						"var" + varId,
-						genome.get(s)[i],
-						intToChar(alt),
+						refString,
+						altString,
 						".",
 						".",
 						flagPrefix + "AF=" + String.format("%.6f", 1.0 * covArray[i][0][alt] / totalCov),
@@ -200,15 +242,50 @@ public static void main(String[] args) throws Exception
 	out.close();
 }
 
+static String getIndelSeq(String pileup)
+{
+	ArrayList<String> seqs = new ArrayList<String>();
+	for(int i = 0; i<pileup.length(); i++)
+	{
+		char c = pileup.charAt(i);
+		
+		if(c == '+' || c == '-')
+		{
+			int end = i;
+			int length = 0;
+			while(end+1 < pileup.length() && pileup.charAt(end+1) >= '0' && pileup.charAt(end+1)<= '9')
+			{
+				end++;
+				length = length * 10 + pileup.charAt(end) - '0';
+			}
+			String seq = pileup.substring(end+1, end+1+length);
+			seqs.add(seq.toUpperCase());
+		}
+	}
+	HashMap<String, Integer> seqFreq = new HashMap<String, Integer>();
+	for(String x : seqs)
+	{
+		seqFreq.put(x, 1 + seqFreq.getOrDefault(x, 0));
+	}
+	for(String x : seqFreq.keySet())
+	{
+		if(seqFreq.get(x) > .8 * seqs.size())
+		{
+			return x;
+		}
+	}
+	return "";
+}
+
 /*
  * Gets the number of A/C/G/T/N's covering a position from an mpileup string
  */
 static int[][] getAlleleFreqs(char refChar, String pileup)
 {
-	int[][] res = new int[3][6];
+	int[][] res = new int[3][7];
 	for(int i = 0; i<res.length; i++)
 	{
-		res[i] = new int[6];
+		res[i] = new int[7];
 	}
 	for(int i = 0; i<pileup.length(); i++)
 	{
@@ -240,14 +317,17 @@ static int[][] getAlleleFreqs(char refChar, String pileup)
 			}
 			boolean capital = (pileup.charAt(end+1) >= 'A' && pileup.charAt(end+1) <= 'Z') || pileup.charAt(end+1) == '*';
 			i = end + length;
-			res[0][5]++;
+			
+			int idx = 5;
+			if(c == '-') idx = 6;
+			res[0][idx]++;
 			if(capital)
 			{
-				res[1][5]++;
+				res[1][idx]++;
 			}
 			else
 			{
-				res[2][5]++;
+				res[2][idx]++;
 			}
 		}
 		
@@ -317,6 +397,7 @@ static char intToChar(int val)
 	else if(val == 1) return 'C';
 	else if(val == 2) return 'G';
 	else if(val == 3) return 'T';
+	else if(val == 5) return '.';
 	else return 'N';
 }
 

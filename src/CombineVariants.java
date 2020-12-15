@@ -25,7 +25,7 @@ public class CombineVariants
 		System.out.println();
 		System.out.println("Required args:");
 		System.out.println("  vcf_file    (String) - vcf file containing the variants after merging across samples");
-		System.out.println("  out_file    (String) - file to output variants after combining adjact positions");
+		System.out.println("  out_file    (String) - file to output variants after combining adjacent positions");
 		System.out.println();
 		System.out.println("Optional args:");
 		System.out.println("  gene_file   (String) - gff file containing genes: only groups variants together if they are in the same CDS reading frame");

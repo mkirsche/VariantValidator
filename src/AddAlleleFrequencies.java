@@ -115,6 +115,12 @@ public class AddAlleleFrequencies {
 		String chrName = entry.getChromosome();
 		int position = entry.getPos() - 1;
 		
+		boolean inOnt = ontMpileup.allFrequencies.containsKey(chrName);
+		if(!inOnt)
+		{
+			return;
+		}
+		
 		// Get the mpileup data for this specific position
 		int[][] ontCovArray = ontMpileup.allFrequencies.get(chrName)[position];
 		

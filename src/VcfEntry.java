@@ -34,7 +34,7 @@ public class VcfEntry implements Comparable<VcfEntry>
 	
 	void setKey() throws Exception
 	{
-		key = getChromosome() + "_" + String.format("%08d", getPos()) + "_" + getAlt();
+		key = getChromosome() + "_" + String.format("%08d", getPos()) + "_" + getRef() + "_" + getAlt();
 	}
 	
 	/*
