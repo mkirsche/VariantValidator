@@ -148,7 +148,7 @@ public class CombineVariants
 			}
 			genomeInput.close();
 		}
-		
+				
 		// The current run of adjacent SNPs
 		ArrayList<VcfEntry> currentEntries = new ArrayList<VcfEntry>();
 		

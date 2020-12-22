@@ -76,6 +76,40 @@ public class MergeVariants
 				}
 				VcfEntry entry = new VcfEntry(line);
 				
+				if(entry.getAlt().startsWith("-"))
+				{
+					String oldRef = entry.getRef();
+					entry.setRef(entry.getRef() + entry.getAlt().substring(1));
+					entry.setAlt(oldRef);
+				}
+				else if(entry.getAlt().startsWith("+"))
+				{
+					entry.setAlt(entry.getRef() + entry.getAlt().substring(1));
+				}
+								
+				while(entry.getRef().length() > 1 && entry.getAlt().length() > 1)
+				{
+					int refLength= entry.getRef().length();
+					int altLength = entry.getAlt().length();
+					if(entry.getRef().charAt(refLength - 1) == entry.getAlt().charAt(altLength - 1))
+					{
+						entry.setRef(entry.getRef().substring(0, refLength - 1));
+						entry.setAlt(entry.getAlt().substring(0, altLength - 1));
+					}
+					else if(entry.getRef().substring(0, 1).equals(entry.getAlt().substring(0, 1)))
+					{
+						entry.setPos(1 + entry.getPos());
+						entry.setRef(entry.getRef().substring(1));
+						entry.setAlt(entry.getAlt().substring(1));
+					}
+					else
+					{
+						break;
+					}
+				}
+				
+				entry.setKey();
+				
 				VcfEntry[] splitEntries = split(entry);
 				
 				for(VcfEntry v : splitEntries)
@@ -141,8 +175,9 @@ public class MergeVariants
 		{
 			return new VcfEntry[] {entry};
 		}
-		VcfEntry[] res = new VcfEntry[entry.getRef().length()];
-		for(int i = 0; i<res.length; i++)
+		
+		ArrayList<VcfEntry> res = new ArrayList<VcfEntry>();
+		for(int i = 0; i<entry.getRef().length(); i++)
 		{
 			VcfEntry cur = new VcfEntry(entry.toString());
 			cur.setRef(entry.getRef().charAt(i) + "");
@@ -150,9 +185,18 @@ public class MergeVariants
 			cur.setPos(entry.getPos() + i);
 			cur.setId(entry.getId() + "_" + i);
 			cur.setKey();
-			res[i] = cur;
+			if(cur.getRef().equalsIgnoreCase(cur.getAlt()))
+			{
+				continue;
+			}
+			res.add(cur);
 		}
-		return res;
+		VcfEntry[] array = new VcfEntry[res.size()];
+		for(int i = 0; i<res.size(); i++)
+		{
+			array[i] = res.get(i);
+		}
+		return array;
 	}
 	
 	static String[] getFilesFromList() throws Exception
