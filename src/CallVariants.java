@@ -193,7 +193,7 @@ public static void main(String[] args) throws Exception
 					}
 					else if(covArray[i][0][6] >= totalCov * indelThreshold)
 					{
-						for(int j = i; j<x.length(); j++)
+						for(int j = i; j<i+x.length(); j++)
 						{
 							deleted.add(j+1);
 						}
