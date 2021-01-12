@@ -16,7 +16,7 @@ public class CallVariants {
 	static int covThreshold = 20;
 	static double refThreshold = .6;
 	static double altThreshold = .15;
-	static double indelThreshold = .4;
+	static double indelThreshold = .15;
 	static String flagPrefix = "";
 	
 	/*
@@ -37,7 +37,7 @@ public class CallVariants {
 		System.out.println("  genome_max_len      (int)    [31000] - an upper bound on the genome length");
 		System.out.println("  alt_threshold       (float)  [0.15]  - call a variant if any alt allele frequency > this value");
 		System.out.println("  ref_threshold       (float)  [0.60]  - call an N even if no alt allele frequency is high enough if ref allele frequency < this value");
-		System.out.println("  indel_threshold       (float)  [0.40]  - call a variant an indel if no other variant is called there and indel frequency > this value");
+		System.out.println("  indel_threshold       (float)  [0.15]  - call a variant an indel if no other variant is called there and indel frequency > this value");
 		System.out.println("  flag_prefix         (String) []      - add this to AF and STRANDAF flag names");
 
 		System.out.println();
