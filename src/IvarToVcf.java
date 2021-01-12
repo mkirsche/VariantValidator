@@ -153,7 +153,7 @@ public class IvarToVcf
 			String filter = ".";
 			String qual = ".";
 			String info = String.format("IVAR_REF_DP=%s;IVAR_REF_RV=%s;IVAR_REF_QUAL=%s;IVAR_ALT_DP=%s;IVAR_ALT_RV=%s;"
-					+ "IVER_ALT_QUAL=%s;IVAR_ALT_FREQ=%s;IVAR_TOTAL_DP=%s;IVAR_PVAL=%s",
+					+ "IVAR_ALT_QUAL=%s;IVAR_ALT_FREQ=%s;IVAR_TOTAL_DP=%s;IVAR_PVAL=%s",
 					getValue(rowIndex, "ref_dp"),
 					getValue(rowIndex, "ref_rv"),
 					getValue(rowIndex, "ref_qual"),
