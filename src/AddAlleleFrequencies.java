@@ -81,7 +81,7 @@ public class AddAlleleFrequencies {
 		{
 			illuminaMpileup = new Mpileup(illuminaMpileupFn);
 		}
-		
+				
 		Scanner input = new Scanner(new FileInputStream(new File(vcfFn)));
 		PrintWriter out = new PrintWriter(new File(ofn));
 		
@@ -187,10 +187,20 @@ public class AddAlleleFrequencies {
 		else
 		{
 			// For indels set everything to 0
-			entry.setInfo("ILLUMINA_AF", "0");
-			entry.setInfo("ILLUMINA_STRANDAF", "0,0,0,0");
-			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
-			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			if(illumina)
+			{
+				entry.setInfo("ILLUMINA_AF", "0");
+				entry.setInfo("ILLUMINA_STRANDAF", "0,0,0,0");
+				entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+				entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			}
+			else
+			{
+				entry.setInfo("AF", "0");
+				entry.setInfo("STRANDAF", "0,0,0,0");
+				entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+				entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			}
 		}
 	}
 	

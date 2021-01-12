@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class CallVariants {
@@ -152,6 +153,7 @@ public static void main(String[] args) throws Exception
 	{
 		// Get an array of allele frequencies for this contig
 		int[][][] covArray = cov.get(s);
+		HashSet<Integer> deleted = new HashSet<Integer>();
 		for(int i = 0; i<covArray.length; i++)
 		{
 			// Total coverage over this position only counting matches/mismatches
@@ -191,6 +193,10 @@ public static void main(String[] args) throws Exception
 					}
 					else if(covArray[i][0][6] >= totalCov * indelThreshold)
 					{
+						for(int j = i; j<x.length(); j++)
+						{
+							deleted.add(j+1);
+						}
 						alt = 6;
 					}
 					System.out.println("Indel at position " + i + ": "+Arrays.toString(covArray[i][0])+" "+totalCov);
@@ -198,7 +204,7 @@ public static void main(String[] args) throws Exception
 				}
 			}
 			
-			if(alt == -1 && covArray[i][0][refChar] < (totalCov) * refThreshold)
+			if(alt == -1 && covArray[i][0][refChar] < (totalCov) * refThreshold && !deleted.contains(i))
 			{
 				System.out.println("Calling N at " + i + " " + Arrays.toString(covArray[i][0]) + " " + refChar);
 				alt = 4;
