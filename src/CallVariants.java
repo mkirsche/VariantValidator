@@ -158,7 +158,7 @@ public static void main(String[] args) throws Exception
 		{
 			// Total coverage over this position only counting matches/mismatches
 			int totalCov = 0;
-			for(int j = 0; j<covArray[i][0].length; j++) totalCov += covArray[i][0][j];
+			for(int j = 0; j<5; j++) totalCov += covArray[i][0][j];
 			
 			if(totalCov < covThreshold) continue;
 			
@@ -179,7 +179,6 @@ public static void main(String[] args) throws Exception
 					alt = j;
 				}
 			}
-			
 			String indelSeq = "";
 			
 			if(alt == -1 && (covArray[i][0][5] >= totalCov * indelThreshold || covArray[i][0][6] >= totalCov * indelThreshold))
@@ -250,8 +249,9 @@ public static void main(String[] args) throws Exception
 
 static String getIndelSeq(String pileup)
 {
+	String[] tabTokens = pileup.split("\t");
 	ArrayList<String> seqs = new ArrayList<String>();
-	for(int i = 0; i<pileup.length(); i++)
+	for(int i = 0; i<tabTokens[4].length(); i++)
 	{
 		char c = pileup.charAt(i);
 		
@@ -266,6 +266,7 @@ static String getIndelSeq(String pileup)
 			}
 			String seq = pileup.substring(end+1, end+1+length);
 			seqs.add(seq.toUpperCase());
+			i = end + length;
 		}
 	}
 	HashMap<String, Integer> seqFreq = new HashMap<String, Integer>();
