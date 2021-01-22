@@ -7,6 +7,20 @@ ref=$1
 bam=$2
 vcfs=$3
 outpref=$4
+
+samtools_snp_threshold=0.15
+samtools_indel_threshold=0.15
+
+while [ "$#" -gt 0 ] ; do
+    OP=$1
+    shift
+    case "$OP" in
+        --) PROG=$1 ; shift ; break ;;
+        --snp_threshold) samtools_snp_threshold=$1 ; shift ;;
+        --indel_threshold) samtools_indel_threshold=$1 ; shift ;;
+    esac
+done
+
 mpileup=$outpref.mpileup
 allelefreqcalls=$outpref.samtools.vcf
 filelist=$outpref.filelist.txt
@@ -19,7 +33,7 @@ filelist=$outpref.filelist.txt
 
 # Run samtools-based variant calling
 javac $BINDIR/src/*.java
-java -cp $BINDIR/src CallVariants pileup_file=$mpileup out_file=$allelefreqcalls
+java -cp $BINDIR/src CallVariants pileup_file=$mpileup out_file=$allelefreqcalls alt_threshold=$samtools_snp_threshold indel_threshold=$samtools_indel_threshold 
 
 # Print out vcf filenames with absolute paths to filelist
 vcfarray=$(echo $vcfs | tr "," "\n")
