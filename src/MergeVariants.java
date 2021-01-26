@@ -75,6 +75,7 @@ public class MergeVariants
 					continue;
 				}
 				VcfEntry entry = new VcfEntry(line);
+				entry.tabTokens[7] = entry.tabTokens[7].replaceAll(";;", ";");
 				
 				if(entry.getAlt().startsWith("-"))
 				{
