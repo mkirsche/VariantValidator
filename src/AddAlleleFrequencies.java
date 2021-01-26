@@ -127,6 +127,20 @@ public class AddAlleleFrequencies {
 		boolean inOnt = ontMpileup.allFrequencies.containsKey(chrName);
 		if(!inOnt)
 		{
+			if(illumina)
+			{
+				entry.setInfo("ILLUMINA_AF", "0");
+				entry.setInfo("ILLUMINA_STRANDAF", "0,0,0,0");
+				entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+				entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			}
+			else
+			{
+				entry.setInfo("AF", "0");
+				entry.setInfo("STRANDAF", "0,0,0,0");
+				entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+				entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			}
 			return;
 		}
 		
@@ -216,6 +230,14 @@ public class AddAlleleFrequencies {
 		boolean inOnt = ontMpileup.allFrequencies.containsKey(chrName);
 		if(!inIllumina && !inOnt)
 		{
+			entry.setInfo("AF", "0");
+			entry.setInfo("STRANDAF", "0,0,0,0");
+			entry.setInfo("ILLUMINA_AF", "0");
+			entry.setInfo("ILLUMINA_STRANDAF", "0,0,0,0");
+			entry.setInfo("POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("ILLUMINA_POSITIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
+			entry.setInfo("ILLUMINA_NEGATIVE_STRAND_FREQUENCIES", "0,0,0,0,0,0");
 			return;
 		}
 		else if(!inIllumina)
