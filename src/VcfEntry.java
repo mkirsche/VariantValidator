@@ -34,7 +34,14 @@ public class VcfEntry implements Comparable<VcfEntry>
 	
 	void setKey() throws Exception
 	{
-		key = getChromosome() + "_" + String.format("%08d", getPos()) + "_" + getRef() + "_" + getAlt();
+		if(getRef().length() > getAlt().length())
+		{
+			key = getChromosome() + "_" + String.format("%08d", getPos()) + "_" + (getRef().length() - getAlt().length());
+		}
+		else
+		{
+			key = getChromosome() + "_" + String.format("%08d", getPos()) + "_" + getRef() + "_" + getAlt();
+		}
 	}
 	
 	/*
@@ -220,9 +227,31 @@ public class VcfEntry implements Comparable<VcfEntry>
 		return false;
 	}
 	
+	static int countNs(String s)
+	{
+		int count = 0;
+		for(int i = 0; i<s.length(); i++)
+		{
+			char c = s.charAt(i);
+			if(c == 'N' || c == 'n')
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+	
 	// Merges v into this variant
 	void merge(VcfEntry v) throws Exception
 	{
+		if(!getRef().equals(v.getRef()))
+		{
+			if(countNs(v.getRef()) < countNs(getRef()))
+			{
+				setRef(v.getRef());
+				setAlt(v.getAlt());
+			}
+		}
 		for(int sample: v.support)
 		{
 			support.add(sample);
