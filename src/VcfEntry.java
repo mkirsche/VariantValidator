@@ -178,7 +178,14 @@ public class VcfEntry implements Comparable<VcfEntry>
 		}
 		
 		// Field not found, so add it!
-		tabTokens[7] += ";" + field + "=" + val;
+		if(tabTokens[7].endsWith(";"))
+		{
+			tabTokens[7] += field + "=" + val;
+		}
+		else
+		{
+			tabTokens[7] += ";" + field + "=" + val;
+		}
 	}
 	
 	/*
