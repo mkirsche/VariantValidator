@@ -172,19 +172,33 @@ public class MergeVariants
 	 */
 	static VcfEntry[] split(VcfEntry entry) throws Exception
 	{
-		if(entry.getRef().length() == 1 || entry.getRef().length() != entry.getAlt().length())
+		if(entry.getRef().length() == 1 || entry.getAlt().length() == 1)
 		{
 			return new VcfEntry[] {entry};
 		}
 		
 		ArrayList<VcfEntry> res = new ArrayList<VcfEntry>();
-		for(int i = 0; i<entry.getRef().length(); i++)
+		for(int i = 0; i<entry.getRef().length() && i < entry.getAlt().length(); i++)
 		{
 			VcfEntry cur = new VcfEntry(entry.toString());
 			cur.setRef(entry.getRef().charAt(i) + "");
 			cur.setAlt(entry.getAlt().charAt(i) + "");
+			if(i == entry.getRef().length() - 1 
+					&& entry.getAlt().length() > entry.getRef().length())
+			{
+				cur.setAlt(entry.getAlt().substring(i));
+			}
+			if(i == entry.getAlt().length() - 1 
+					&& entry.getRef().length() > entry.getAlt().length())
+			{
+				cur.setRef(entry.getRef().substring(i));
+			}
 			cur.setPos(entry.getPos() + i);
-			cur.setId(entry.getId() + "_" + i);
+			cur.setId(entry.getId());
+			if(!entry.getId().equals("."))
+			{
+				cur.setId(entry.getId() + "_" + i);
+			}
 			cur.setKey();
 			if(cur.getRef().equalsIgnoreCase(cur.getAlt()))
 			{
